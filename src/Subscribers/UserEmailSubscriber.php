@@ -2,7 +2,7 @@
 
 namespace App\Subscribers;
 
-use App\Events\InvitationSentEvent;
+use App\Events\InvitationEvent;
 use App\Events\UserRegisteredEvent;
 use App\Mail\HtmlTextEmailService;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -19,7 +19,8 @@ class UserEmailSubscriber implements EventSubscriberInterface
     {
         return [
             UserRegisteredEvent::NAME => 'onRegisterEmail',
-            InvitationSentEvent::NAME => 'onInvitationCreated',
+            InvitationEvent::USER_INVITED => 'onInvitationCreated',
+            InvitationEvent::USER_CANCELED => 'onInvitationCanceled',
         ];
     }
 
@@ -29,17 +30,36 @@ class UserEmailSubscriber implements EventSubscriberInterface
     public function onRegisterEmail(UserRegisteredEvent $event)
     {
         $message = "<p>Dear user, please confirm your email address by clicking this link: <a href='{$event->getEmailVerificationLink()}'>Verify</a></p>";
-        $mailer = new HtmlTextEmailService($this->mailer, $message, $event->getUser()->getEmail(), 'Email confirmation');
-        $mailer->send();
+        $this->sendEmail( $message, $event->getUser()->getEmail(), 'Email confirmation');
     }
 
-    public function onInvitationCreated(InvitationSentEvent $event)
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function onInvitationCreated(InvitationEvent $event)
     {
         $invitedByEmail = $event->getInvitation()->getInvitedBy()->getEmail();
         $invitedEmail = $event->getInvitation()->getInvitedUser()->getEmail();
 
         $message = "<p>Dear user, You have just been invited by $invitedByEmail</p>";
-        $mailer = new HtmlTextEmailService($this->mailer, $message, $invitedEmail, 'Invitation received');
+        $this->sendEmail($message, $invitedEmail, 'Invitation received');
+    }
+
+    public function onInvitationCanceled(InvitationEvent $event)
+    {
+        $invitedByEmail = $event->getInvitation()->getInvitedBy()->getEmail();
+        $invitedEmail = $event->getInvitation()->getInvitedUser()->getEmail();
+
+        $message = "<p>Dear user, the invitation sent by $invitedByEmail has just been canceled!</p>";
+        $this->sendEmail($message, $invitedEmail, 'Invitation canceled');
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    private function sendEmail(string $message, string $email, string $subject)
+    {
+        $mailer = new HtmlTextEmailService($this->mailer, $message, $email, $subject);
         $mailer->send();
     }
 }

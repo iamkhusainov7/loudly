@@ -5,9 +5,10 @@ namespace App\Events;
 use App\Entity\Invitation;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class InvitationSentEvent extends Event
+class InvitationEvent extends Event
 {
-    public const NAME = 'user.invited';
+    public const USER_INVITED = 'user.invited';
+    public const USER_CANCELED = 'user.invite.canceled';
 
     /**
      * @param Invitation $invitation
