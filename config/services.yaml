@@ -21,6 +21,10 @@ services:
             - '../src/Kernel.php'
             - '../src/Tests/'
 
+    App\EventListener\ExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
+
     user.registration.form.validator:
         class: App\Validator\UserRegistrationFormValidator
         autowire: false
