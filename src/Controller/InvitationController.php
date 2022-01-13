@@ -107,6 +107,80 @@ class InvitationController extends AbstractController
     }
 
     /**
+     * @param int $id
+     * @param UserInterface $user
+     * @param InvitationRepository $repository
+     * @return Response
+     */
+    #[Route('/invitation/decline/{id}', name: 'invitation_decline',  requirements: ['id' => '\d+'], methods: ['PUT'] )]
+    public function decline(int $id, UserInterface $user, InvitationRepository $repository): Response
+    {
+        try {
+            $invitation = $repository->find($id);
+
+            if (
+                ! $invitation || $invitation->getInvitedUser() !== $user
+                || $invitation->getIsCanceled()
+            ) {
+                throw new NotFoundHttpException('The event has been canceled or not found!');
+            }
+
+            $invitation->setIsDeclined(true);
+            $entityManager = $this->managerRegistry->getManager();
+
+            $entityManager->persist($invitation);
+            $entityManager->flush();
+
+            $this->dispatcher->dispatch(new InvitationEvent($invitation), InvitationEvent::USER_DECLINED);
+
+            return $this->json([], Response::HTTP_OK);
+        } catch (HttpException $e) {
+            return $this->json([
+                'message' => $e->getMessage(),
+            ], $e->getStatusCode());
+        } catch (\Throwable $e) {
+            return $this->json([], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * @param int $id
+     * @param UserInterface $user
+     * @param InvitationRepository $repository
+     * @return Response
+     */
+    #[Route('/invitation/accept/{id}', name: 'invitation_accept',  requirements: ['id' => '\d+'], methods: ['PUT'] )]
+    public function accept(int $id, UserInterface $user, InvitationRepository $repository): Response
+    {
+        try {
+            $invitation = $repository->find($id);
+
+            if (
+                ! $invitation || $invitation->getInvitedUser() !== $user
+                || $invitation->getIsCanceled()
+            ) {
+                throw new NotFoundHttpException('The event has been canceled or not found!');
+            }
+
+            $invitation->setIsAccepted(true);
+            $entityManager = $this->managerRegistry->getManager();
+
+            $entityManager->persist($invitation);
+            $entityManager->flush();
+
+            $this->dispatcher->dispatch(new InvitationEvent($invitation), InvitationEvent::USER_DECLINED);
+
+            return $this->json([], Response::HTTP_OK);
+        } catch (HttpException $e) {
+            return $this->json([
+                'message' => $e->getMessage(),
+            ], $e->getStatusCode());
+        } catch (\Throwable $e) {
+            return $this->json([], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
      * @param User $user
      * @return Response
      */
@@ -115,6 +189,27 @@ class InvitationController extends AbstractController
     {
         try {
             $invitations = $user->getSentInvitations();
+            $mapped = new ArrayCollection();
+
+            foreach ($invitations as $invitation) {
+                $mapped->add(InvitationListDto::fromEntity($invitation));
+            }
+
+            return $this->json($mapped->toArray(), Response::HTTP_OK);
+        }catch (\Throwable) {
+            return $this->json([], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * @param User $user
+     * @return Response
+     */
+    #[Route('/invitation/invitation-list', name: 'invitation_my_invitation_list', methods: ['GET'])]
+    public function myReceivedInvitations(UserInterface $user): Response
+    {
+        try {
+            $invitations = $user->getReceivedInvitations();
             $mapped = new ArrayCollection();
 
             foreach ($invitations as $invitation) {
