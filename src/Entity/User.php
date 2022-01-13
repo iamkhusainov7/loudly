@@ -71,6 +71,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private \DateTimeInterface $confirmedAt;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $apiToken;
+
     public function __construct(array $data = [])
     {
         $this->firstName = $data[self::USER_FIRSTNAME_KEY] ?? null;
@@ -220,5 +223,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUsername(): string
     {
         return "{$this->getFirstName()} {$this->getLastName()}";
+    }
+
+    public function getApiToken(): ?string
+    {
+        return $this->apiToken;
+    }
+
+    public function setApiToken(?string $apiToken): self
+    {
+        $this->apiToken = $apiToken;
+
+        return $this;
     }
 }

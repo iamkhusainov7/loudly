@@ -10,6 +10,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserLoginFormValidator implements ValidatorInterface
 {
+    private ?User $user = null;
+
     public function __construct(private UserPasswordHasherInterface $passwordHasher, private UserRepository $repository)
     {
     }
@@ -27,9 +29,22 @@ class UserLoginFormValidator implements ValidatorInterface
             throw new LoginFailedException();
         }
 
+        if (! $user->getIsConfirmed()) {
+            throw new LoginFailedException('Please, verify your email first!');
+        }
 
         if (! $this->passwordHasher->isPasswordValid($user, $data->userPassword)) {
             throw new LoginFailedException();
         }
+
+        $this->user = $user;
+    }
+
+    /**
+     * @return User|null
+     */
+    public function getValidated(): ?User
+    {
+        return $this->user;
     }
 }
