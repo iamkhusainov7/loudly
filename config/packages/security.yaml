@@ -8,30 +8,28 @@ security:
 
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        # used to reload user from session & other features (e.g. switch_user)
-        app_user_provider:
+#        # used to reload user from session & other features (e.g. switch_user)
+        users:
             entity:
-                class: App\Entity\UserEnt
-                property: email
+                class: App\Entity\User
+                property: apiToken
     firewalls:
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
         main:
             lazy: true
-            provider: app_user_provider
+            logout: ~
+            security: true
+            custom_authenticators:
+                - App\Security\TokenAuthenticator
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
+            switch_user: true
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+         - { path: ^/invitation, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:
