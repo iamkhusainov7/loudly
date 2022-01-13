@@ -5,14 +5,20 @@ namespace App\Controller;
 use App\Dto\AutoMapper\InvitationFormMapper;
 use App\Dto\Invitation\InvitationDtoInterface;
 use App\Dto\Invitation\InvitationFormDto;
-use App\Events\InvitationSentEvent;
+use App\Dto\Invitation\InvitationListDto;
+use App\Entity\User;
+use App\Events\InvitationEvent;
 use App\Exceptions\ValidationFailedException;
+use App\Repository\InvitationRepository;
 use App\Validator\InvitationFormValidator;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -40,10 +46,7 @@ class InvitationController extends AbstractController
             $data[InvitationDtoInterface::INVITATION_INVITED_BY] = $user;
             $dto = new InvitationFormDto($data);
 
-
             $invitation = $mapper->map($dto);
-
-            $invitation->setInvitedBy($user);
 
             $validator->validate($invitation);
 
@@ -52,7 +55,7 @@ class InvitationController extends AbstractController
             $entityManager->persist($invitation);
             $entityManager->flush();
 
-            $this->dispatcher->dispatch(new InvitationSentEvent($invitation), InvitationSentEvent::NAME);
+            $this->dispatcher->dispatch(new InvitationEvent($invitation), InvitationEvent::USER_INVITED);
 
             return $this->json([], Response::HTTP_CREATED);
         } catch (ValidationFailedException $e) {
@@ -61,6 +64,65 @@ class InvitationController extends AbstractController
                 'data' => $e->getMessages()->toArray(),
             ], $e->getStatusCode());
         } catch (\Throwable $e) {
+            return $this->json([], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * @param int $id
+     * @param UserInterface $user
+     * @param InvitationRepository $repository
+     * @return Response
+     */
+    #[Route('/invitation/cancel/{id}', name: 'invitation_cancel',  requirements: ['id' => '\d+'], methods: ['PUT'] )]
+    public function cancel(int $id, UserInterface $user, InvitationRepository $repository): Response
+    {
+        try {
+            $invitation = $repository->find($id);
+
+            if (! $invitation || $invitation->getInvitedBy() !== $user) {
+                throw new NotFoundHttpException();
+            }
+
+            if ($invitation->getIsCanceled()) {
+                throw new HttpException(Response::HTTP_NO_CONTENT);
+            }
+
+            $invitation->setIsCanceled(true);
+            $entityManager = $this->managerRegistry->getManager();
+
+            $entityManager->persist($invitation);
+            $entityManager->flush();
+
+            $this->dispatcher->dispatch(new InvitationEvent($invitation), InvitationEvent::USER_CANCELED);
+
+            return $this->json([], Response::HTTP_OK);
+        } catch (HttpException $e) {
+            return $this->json([
+                'message' => $e->getMessage(),
+            ], $e->getStatusCode());
+        } catch (\Throwable $e) {
+            return $this->json([], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * @param User $user
+     * @return Response
+     */
+    #[Route('/invitation/mylist', name: 'invitation_my_invitations', methods: ['GET'])]
+    public function myCreatedInvitations(UserInterface $user): Response
+    {
+        try {
+            $invitations = $user->getSentInvitations();
+            $mapped = new ArrayCollection();
+
+            foreach ($invitations as $invitation) {
+                $mapped->add(InvitationListDto::fromEntity($invitation));
+            }
+
+            return $this->json($mapped->toArray(), Response::HTTP_OK);
+        }catch (\Throwable) {
             return $this->json([], Response::HTTP_SERVICE_UNAVAILABLE);
         }
     }
