@@ -88,7 +88,7 @@ class InvitationController extends AbstractController
                 throw new HttpException(Response::HTTP_NO_CONTENT);
             }
 
-            $invitation->setIsCanceled(true);
+            $invitation->setIsCanceled();
             $entityManager = $this->managerRegistry->getManager();
 
             $entityManager->persist($invitation);
@@ -125,7 +125,7 @@ class InvitationController extends AbstractController
                 throw new NotFoundHttpException('The event has been canceled or not found!');
             }
 
-            $invitation->setIsDeclined(true);
+            $invitation->setIsDeclined();
             $entityManager = $this->managerRegistry->getManager();
 
             $entityManager->persist($invitation);
@@ -162,7 +162,7 @@ class InvitationController extends AbstractController
                 throw new NotFoundHttpException('The event has been canceled or not found!');
             }
 
-            $invitation->setIsAccepted(true);
+            $invitation->setIsAccepted();
             $entityManager = $this->managerRegistry->getManager();
 
             $entityManager->persist($invitation);
@@ -213,11 +213,15 @@ class InvitationController extends AbstractController
             $mapped = new ArrayCollection();
 
             foreach ($invitations as $invitation) {
+                if ($invitation->getIsDeclined()) {
+                    continue;
+                }
+
                 $mapped->add(InvitationListDto::fromEntity($invitation));
             }
 
             return $this->json($mapped->toArray(), Response::HTTP_OK);
-        }catch (\Throwable) {
+        }catch (\Throwable $e) {
             return $this->json([], Response::HTTP_SERVICE_UNAVAILABLE);
         }
     }

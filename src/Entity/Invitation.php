@@ -11,11 +11,18 @@ class Invitation
 {
     public const INVITATION_Id_KEY = 'id';
     public const INVITATION_INVITED_AT = 'invited_at';
-    public const INVITATION_IS_CANCELED = 'canceled';
-    public const INVITATION_IS_ACCEPTED = 'is_accepted';
-    public const INVITATION_IS_DECLINED = 'is_declined';
+    public const STATUS = 'status';
     public const INVITATION_INVITED_BY = 'invited_by';
     public const INVITATION_USER_INVITED = 'invited_user';
+
+    /**
+     * Statuses
+     */
+
+    public const IS_ACCEPTED = 'accepted';
+    public const IS_PENDING = 'pending';
+    public const IS_DECLINED = 'declined';
+    public const IS_CANCELED = 'canceled';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -34,14 +41,8 @@ class Invitation
     #[ORM\JoinColumn(nullable: false)]
     private User $invitedBy;
 
-    #[ORM\Column(type: 'boolean')]
-    private bool $isCanceled;
-
-    #[ORM\Column(type: 'boolean')]
-    private bool $isAccepted;
-
-    #[ORM\Column(type: 'boolean')]
-    private bool $isDeclined;
+    #[ORM\Column(type: 'string')]
+    private string $status = self::IS_PENDING;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $updatedAt;
@@ -50,9 +51,7 @@ class Invitation
     {
         $this->invitedUser = $data[self::INVITATION_USER_INVITED] ?? null;
         $this->invitedBy = $data[self::INVITATION_INVITED_BY] ?? null;
-        $this->isAccepted = $data[self::INVITATION_IS_ACCEPTED] ?? false;
-        $this->isCanceled = $data[self::INVITATION_IS_CANCELED] ?? false;
-        $this->isDeclined = $data[self::INVITATION_IS_DECLINED] ?? false;
+        $this->status =  $data[self::STATUS] ?? self::IS_PENDING;
         $this->invitedAt = $data[self::INVITATION_INVITED_AT] ?? new \DateTimeImmutable();
     }
 
@@ -97,38 +96,38 @@ class Invitation
         return $this;
     }
 
-    public function getIsCanceled(): ?bool
+    public function getIsCanceled(): bool
     {
-        return $this->isCanceled;
+        return $this->status === self::IS_CANCELED;
     }
 
-    public function setIsCanceled(bool $isCanceled): self
+    public function setIsCanceled(): self
     {
-        $this->isCanceled = $isCanceled;
+        $this->status = self::IS_CANCELED;
 
         return $this;
     }
 
-    public function getIsAccepted(): ?bool
+    public function getIsAccepted(): bool
     {
-        return $this->isAccepted;
+        return $this->status === self::IS_ACCEPTED;
     }
 
-    public function setIsAccepted(bool $isAccepted): self
+    public function setIsAccepted(): self
     {
-        $this->isAccepted = $isAccepted;
+        $this->status = self::IS_ACCEPTED;
 
         return $this;
     }
 
     public function getIsDeclined(): ?bool
     {
-        return $this->isDeclined;
+        return $this->status === self::IS_DECLINED;
     }
 
-    public function setIsDeclined(bool $isDeclined): self
+    public function setIsDeclined(): self
     {
-        $this->isDeclined = $isDeclined;
+        $this->status = self::IS_DECLINED;
 
         return $this;
     }
@@ -147,6 +146,14 @@ class Invitation
 
     public function isPending(): bool
     {
-        return ! $this->isDeclined && ! $this->isCanceled && ! $this->isAccepted;
+        return $this->status === self::IS_PENDING;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->status;
     }
 }
