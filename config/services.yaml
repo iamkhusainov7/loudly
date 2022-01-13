@@ -21,5 +21,16 @@ services:
             - '../src/Kernel.php'
             - '../src/Tests/'
 
+    user.registration.form.validator:
+        class: App\Validator\UserRegistrationFormValidator
+        autowire: false
+
+    App\Controller\Auth\UserRegistrationController:
+        arguments:
+            - '@Doctrine\Persistence\ManagerRegistry'
+            - '@user.registration.form.validator'
+
+
+    App\Service\SiteUpdateManager: '@user.registration.form.validator'
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
