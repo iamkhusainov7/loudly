@@ -4,14 +4,8 @@ namespace App\Dto\User;
 
 use App\Dto\DataTransferObjectTemplate;
 
-class UserDto extends DataTransferObjectTemplate
+class UserDto extends DataTransferObjectTemplate implements UserDtoInterface
 {
-    public const USER_Id_KEY = 'userId';
-    public const USER_FIRSTNAME_KEY = 'userFirstName';
-    public const USER_LASTNAME_KEY = 'userLastName';
-    public const USER_EMAIL_KEY = 'userEmail';
-    public const USER_IS_CONFIRMED_KEY = 'isConfirmed';
-
     public ?int $userId;
 
     public ?string $userFirstName;
