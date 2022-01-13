@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Dto\User\UserDto;
 use App\Dto\User\UserRegistrationDto;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -74,6 +76,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $apiToken;
 
+    #[ORM\OneToMany(mappedBy: 'invitedUser', targetEntity: Invitation::class)]
+    private ArrayCollection $receivedInvitations;
+
+    #[ORM\OneToMany(mappedBy: 'invitedBy', targetEntity: Invitation::class)]
+    private ArrayCollection $sentInvitations;
+
     public function __construct(array $data = [])
     {
         $this->firstName = $data[self::USER_FIRSTNAME_KEY] ?? null;
@@ -81,6 +89,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->email = $data[self::USER_EMAIL_KEY] ?? null;
         $this->password = $data[self::USER_PASSWORD_KEY] ?? null;
         $this->createdAt = new \DateTimeImmutable();
+        $this->receivedInvitations = new ArrayCollection();
+        $this->sentInvitations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -233,6 +243,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setApiToken(?string $apiToken): self
     {
         $this->apiToken = $apiToken;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Invitation[]
+     */
+    public function getReceivedInvitations(): Collection
+    {
+        return $this->receivedInvitations;
+    }
+
+    public function addReceivedInvitation(Invitation $receivedInvitation): self
+    {
+        if (!$this->receivedInvitations->contains($receivedInvitation)) {
+            $this->receivedInvitations[] = $receivedInvitation;
+            $receivedInvitation->setInvitedUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReceivedInvitation(Invitation $receivedInvitation): self
+    {
+        if ($this->receivedInvitations->removeElement($receivedInvitation)) {
+            // set the owning side to null (unless already changed)
+            if ($receivedInvitation->getInvitedUser() === $this) {
+                $receivedInvitation->setInvitedUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Invitation[]
+     */
+    public function getSentInvitations(): Collection
+    {
+        return $this->sentInvitations;
+    }
+
+    public function addSentInvitation(Invitation $sentInvitation): self
+    {
+        if (!$this->sentInvitations->contains($sentInvitation)) {
+            $this->sentInvitations[] = $sentInvitation;
+            $sentInvitation->setInvitedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSentInvitation(Invitation $sentInvitation): self
+    {
+        if ($this->sentInvitations->removeElement($sentInvitation)) {
+            // set the owning side to null (unless already changed)
+            if ($sentInvitation->getInvitedBy() === $this) {
+                $sentInvitation->setInvitedBy(null);
+            }
+        }
 
         return $this;
     }
