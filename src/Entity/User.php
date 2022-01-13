@@ -77,10 +77,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $apiToken;
 
     #[ORM\OneToMany(mappedBy: 'invitedUser', targetEntity: Invitation::class)]
-    private ArrayCollection $receivedInvitations;
+    private Collection  $receivedInvitations;
 
     #[ORM\OneToMany(mappedBy: 'invitedBy', targetEntity: Invitation::class)]
-    private ArrayCollection $sentInvitations;
+    private Collection  $sentInvitations;
 
     public function __construct(array $data = [])
     {

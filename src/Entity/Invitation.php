@@ -44,7 +44,7 @@ class Invitation
     private bool $isDeclined;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private \DateTimeImmutable $updatedAt;
+    private ?\DateTimeImmutable $updatedAt;
 
     public function __construct(array $data)
     {
