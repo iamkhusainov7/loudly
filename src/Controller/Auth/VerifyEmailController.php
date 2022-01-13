@@ -48,6 +48,8 @@ class VerifyEmailController extends AbstractController
 
             $entityManager = $this->managerRegistry->getManager();
             $user->setIsConfirmed(true);
+            $user->setConfirmedAt(new \DateTimeImmutable());
+
             $entityManager->persist($user);
             $entityManager->flush();
 
