@@ -21,6 +21,8 @@ class UserEmailSubscriber implements EventSubscriberInterface
             UserRegisteredEvent::NAME => 'onRegisterEmail',
             InvitationEvent::USER_INVITED => 'onInvitationCreated',
             InvitationEvent::USER_CANCELED => 'onInvitationCanceled',
+            InvitationEvent::USER_DECLINED => 'onInvitationDecline',
+            InvitationEvent::USER_ACCEPTED => 'onInvitationAccept',
         ];
     }
 
@@ -52,6 +54,24 @@ class UserEmailSubscriber implements EventSubscriberInterface
 
         $message = "<p>Dear user, the invitation sent by $invitedByEmail has just been canceled!</p>";
         $this->sendEmail($message, $invitedEmail, 'Invitation canceled');
+    }
+
+    public function onInvitationDecline(InvitationEvent $event)
+    {
+        $invitedByEmail = $event->getInvitation()->getInvitedBy()->getEmail();
+        $invitedEmail = $event->getInvitation()->getInvitedUser()->getEmail();
+
+        $message = "<p>Dear user, your invitation sent to $invitedEmail has just been declined!</p>";
+        $this->sendEmail($message, $invitedByEmail, 'Invitation declined');
+    }
+
+    public function onInvitationAccept(InvitationEvent $event)
+    {
+        $invitedByEmail = $event->getInvitation()->getInvitedBy()->getEmail();
+        $invitedEmail = $event->getInvitation()->getInvitedUser()->getEmail();
+
+        $message = "<p>Dear user, your invitation sent to $invitedEmail has just been acceptedd!</p>";
+        $this->sendEmail($message, $invitedByEmail, 'Invitation accepted');
     }
 
     /**

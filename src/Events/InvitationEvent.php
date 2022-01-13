@@ -9,6 +9,8 @@ class InvitationEvent extends Event
 {
     public const USER_INVITED = 'user.invited';
     public const USER_CANCELED = 'user.invite.canceled';
+    public const USER_DECLINED = 'user.invite.declined';
+    public const USER_ACCEPTED = 'user.invite.accepted';
 
     /**
      * @param Invitation $invitation
