@@ -41,7 +41,7 @@ class InvitationFormValidator extends FormValidator
         if (
             $invitation->isPending()
         ) {
-            return;
+            throw new ValidationFailedException(new ArrayCollection([InvitationDtoInterface::INVITATION_USER_INVITED => 'You have already sent the invitation to this user!']));
         }
 
         if ($invitation->getIsAccepted()) {
