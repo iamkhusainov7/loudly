@@ -27,8 +27,8 @@ php bin/console doctrine:migrations:migrate
 ### API endpoints
 
 ## GET
-`authenticated` [/invitation/my-list]<br/> - must have header X-AUTH-TOKEN
-`authenticated` [/invitation/invitation-list]<br/> - must have header X-AUTH-TOKEN
+`authenticated` [/invitation/my-list] - must have header X-AUTH-TOKEN
+`authenticated` [/invitation/invitation-list] - must have header X-AUTH-TOKEN <br/>
 
 ## POST
 `any client` [/auth/user/registration]<br/>
@@ -49,18 +49,18 @@ php bin/console doctrine:migrations:migrate
 |           `userEmail` | required | email  | User email.                 |
 |        `userPassword` | required | string | User password               |
 
-`authorized only` [/auth/user/verify]<br/> - the link is generated and sent to the email
+`authorized only` [/auth/user/verify] - the link is generated and sent to the email <br/>
 
-`authenticated` [/invitation/invite]<br/> - must have header X-AUTH-TOKEN
+`authenticated` [/invitation/invite] - must have header X-AUTH-TOKEN <br/>
 
 |                    Name | Required | Type  | Description                              |
 |------------------------:|:--------:|:-----:|------------------------------------------|
 | `invitationInvitedUser` | required | email | Email of the user who should be invited. |
 
 ## PUT
-`authenticated` [/invitation/accept/{id}]<br/> - must have header X-AUTH-TOKEN
-`authenticated` [/invitation/decline/{id}]<br/> - must have header X-AUTH-TOKEN
-`authenticated` [/invitation/cancel/{id}]<br/> - must have header X-AUTH-TOKEN
+`authenticated` [/invitation/accept/{id}] - must have header X-AUTH-TOKEN <br/>
+`authenticated` [/invitation/decline/{id}] - must have header X-AUTH-TOKEN <br/>
+`authenticated` [/invitation/cancel/{id}] - must have header X-AUTH-TOKEN <br/>
 
 | Name | Required | Type  | Description           |
 |-----:|:--------:|:-----:|-----------------------|
