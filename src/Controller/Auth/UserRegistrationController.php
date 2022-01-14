@@ -68,8 +68,6 @@ class UserRegistrationController extends AbstractController
                 'message' => $e->getMessage(),
                 'data' => $e->getMessages()->toArray(),
             ], $e->getStatusCode());
-        } catch (\Throwable $e) {
-            return $this->json([], Response::HTTP_SERVICE_UNAVAILABLE);
         }
     }
 }

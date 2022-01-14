@@ -62,7 +62,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'string')]
     #[Assert\NotBlank(message: UserRegistrationDto::USER_PASSWORD . " cannot be blank")]
-    private string $password;
+    private ?string $password;
 
     #[ORM\Column(type: 'boolean')]
     private bool $isConfirmed = false;

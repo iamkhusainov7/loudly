@@ -89,6 +89,7 @@ class InvitationController extends AbstractController
             }
 
             $invitation->setIsCanceled();
+            $invitation->setUpdatedAt(new \DateTimeImmutable());
             $entityManager = $this->managerRegistry->getManager();
 
             $entityManager->persist($invitation);
@@ -125,7 +126,12 @@ class InvitationController extends AbstractController
                 throw new NotFoundHttpException('The event has been canceled or not found!');
             }
 
+            if ($invitation->getIsDeclined()) {
+                throw new HttpException(Response::HTTP_NO_CONTENT);
+            }
+
             $invitation->setIsDeclined();
+            $invitation->setUpdatedAt(new \DateTimeImmutable());
             $entityManager = $this->managerRegistry->getManager();
 
             $entityManager->persist($invitation);
@@ -162,7 +168,12 @@ class InvitationController extends AbstractController
                 throw new NotFoundHttpException('The event has been canceled or not found!');
             }
 
+            if ($invitation->getIsAccepted()) {
+                throw new HttpException(Response::HTTP_NO_CONTENT);
+            }
+
             $invitation->setIsAccepted();
+            $invitation->setUpdatedAt(new \DateTimeImmutable());
             $entityManager = $this->managerRegistry->getManager();
 
             $entityManager->persist($invitation);
@@ -213,7 +224,7 @@ class InvitationController extends AbstractController
             $mapped = new ArrayCollection();
 
             foreach ($invitations as $invitation) {
-                if ($invitation->getIsDeclined()) {
+                if ($invitation->getIsCanceled()) {
                     continue;
                 }
 
