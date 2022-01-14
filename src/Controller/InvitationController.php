@@ -184,7 +184,7 @@ class InvitationController extends AbstractController
      * @param User $user
      * @return Response
      */
-    #[Route('/invitation/mylist', name: 'invitation_my_invitations', methods: ['GET'])]
+    #[Route('/invitation/my-list', name: 'invitation_my_invitations', methods: ['GET'])]
     public function myCreatedInvitations(UserInterface $user): Response
     {
         try {

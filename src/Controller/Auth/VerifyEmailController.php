@@ -19,7 +19,7 @@ class VerifyEmailController extends AbstractController
     {
     }
 
-    #[Route("/verify", name:"registration_confirmation_route", methods: ['POST'])]
+    #[Route("/auth/user/verify", name:"registration_confirmation_route", methods: ['POST'])]
     public function verifyUserEmail(
         Request        $request,
         UserRepository $userRepository
