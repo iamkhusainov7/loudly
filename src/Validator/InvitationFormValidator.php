@@ -44,9 +44,10 @@ class InvitationFormValidator extends FormValidator
             throw new ValidationFailedException(new ArrayCollection([InvitationDtoInterface::INVITATION_USER_INVITED => 'You have already sent the invitation to this user!']));
         }
 
-        if ($invitation->getIsAccepted()) {
-            throw new ValidationFailedException(new ArrayCollection([InvitationDtoInterface::INVITATION_USER_INVITED => 'This user has already accepted your invitation!']));
-        }
+        //I was not sure if the invitations can be multiple, if in the case of canceling or declining, a user should be able to send one more invitation
+//        if ($invitation->getIsAccepted()) {
+//            throw new ValidationFailedException(new ArrayCollection([InvitationDtoInterface::INVITATION_USER_INVITED => 'This user has already accepted your invitation!']));
+//        }
     }
 
     protected function mapPath(string $path): ?string
