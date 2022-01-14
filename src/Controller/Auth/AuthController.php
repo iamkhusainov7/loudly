@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class AuthController extends AbstractController
 {
@@ -40,6 +41,22 @@ class AuthController extends AbstractController
             return $this->json([
                 'message' => $e->getMessage(),
             ], $e->getStatusCode());
+        } catch (\Throwable $e) {
+            return $this->json([], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    #[Route('/auth/user/logout', name: 'auth_user_out', methods: ['DELETE'])]
+    public function logout(UserInterface $user): Response
+    {
+        try {
+            $user->setApiToken(null);
+
+            $entityManager = $this->managerRegistry->getManager();
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            return $this->json([], Response::HTTP_OK);
         } catch (\Throwable $e) {
             return $this->json([], Response::HTTP_SERVICE_UNAVAILABLE);
         }
