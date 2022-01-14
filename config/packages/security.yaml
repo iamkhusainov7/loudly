@@ -18,6 +18,7 @@ security:
             lazy: true
             logout: ~
             security: true
+            pattern: ^/invitation
             custom_authenticators:
                 - App\Security\TokenAuthenticator
 
@@ -29,7 +30,7 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-         - { path: ^/invitation, roles: IS_AUTHENTICATED_FULLY }
+         - { path: ^/invitation, roles: ROLE_USER }
 
 when@test:
     security:

@@ -27,7 +27,8 @@ services:
 
     user.registration.form.validator:
         class: App\Validator\UserRegistrationFormValidator
-        autowire: false
+        autowire: true
+
 
     App\Controller\Auth\UserRegistrationController:
         arguments:
